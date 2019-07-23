@@ -1,11 +1,8 @@
-const friends = require('../data/friends.js');
-
-
 module.exports = {};
 
 module.exports.homeRoute = (app) => {
     app.get('/', (req, res) => {
-        res.render('home', {title: "Mongo Scraper", subtitle: "New York Times Edition", home_current: true});
+        res.render('home', {title: "Mongo Scraper", subtitle: "The Onion Edition", home_current: true});
     });
 };
 
