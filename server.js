@@ -17,6 +17,7 @@ app.set('view engine', 'handlebars');
 htmlRoutes.homeRoute(app);
 htmlRoutes.savedRoute(app);
 apiRoutes.getHeadlinesRoute(app);
+apiRoutes.getNotesRoute(app);
 apiRoutes.getClearRoute(app);
 apiRoutes.getFetchRoute(app);
 app.listen(PORT);

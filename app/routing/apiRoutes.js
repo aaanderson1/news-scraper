@@ -14,39 +14,102 @@ module.exports.getHeadlinesRoute = (app) => {
         const data = req.query;
         console.log(data);
         res.setHeader('Content-Type', 'application/json');
-        db.Article.find({ saved: data.saved })
-        .then(function(dbArticle) {
-          // If we were able to successfully find Articles, send them back to the client
-          res.json(dbArticle);
-        })
-        .catch(function(err) {
-          // If an error occurred, send it to the client
-          res.json(err);
-        });
+        db.Article.find({
+                saved: data.saved
+            })
+            .then(function (dbArticle) {
+                // If we were able to successfully find Articles, send them back to the client
+                res.json(dbArticle);
+            })
+            .catch(function (err) {
+                // If an error occurred, send it to the client
+                res.json(err);
+            });
     });
     app.put('/api/headlines/:id', (req, res) => {
         res.setHeader('Content-Type', 'application/json');
-        db.Article.findOneAndUpdate({ _id: req.params.id }, req.body)
-        .then(function(dbArticle) {
-          // If we were able to successfully find Articles, send them back to the client
-          res.json(dbArticle);
-        })
-        .catch(function(err) {
-          // If an error occurred, send it to the client
-          res.json(err);
-        });
+        db.Article.findOneAndUpdate({
+                _id: req.params.id
+            }, req.body)
+            .then(function (dbArticle) {
+                // If we were able to successfully find Articles, send them back to the client
+                res.json(dbArticle);
+            })
+            .catch(function (err) {
+                // If an error occurred, send it to the client
+                res.json(err);
+            });
     });
     app.delete('/api/headlines/:id', (req, res) => {
         res.setHeader('Content-Type', 'application/json');
-        db.Article.remove({ _id: req.params.id })
-        .then(function(dbArticle) {
-          // If we were able to successfully find Articles, send them back to the client
-          res.json(dbArticle);
-        })
-        .catch(function(err) {
-          // If an error occurred, send it to the client
-          res.json(err);
-        });
+        db.Article.remove({
+                _id: req.params.id
+            })
+            .then(function (dbArticle) {
+                // If we were able to successfully find Articles, send them back to the client
+                res.json(dbArticle);
+            })
+            .catch(function (err) {
+                // If an error occurred, send it to the client
+                res.json(err);
+            });
+    });
+};
+
+module.exports.getNotesRoute = (app) => {
+    app.get('/api/notes/:id', (req, res) => {
+        const data = req.query;
+        res.setHeader('Content-Type', 'application/json');
+        db.Article.find({
+                _id: req.params.id
+            })
+            .populate("notes")
+            .then(function (dbArticle) {
+                // If we were able to successfully find Articles, send them back to the client
+                res.json(dbArticle[0].notes);
+            })
+            .catch(function (err) {
+                // If an error occurred, send it to the client
+                res.json([]);
+            });
+    });
+
+    app.post('/api/notes/', (req, res) => {
+        const data = req.body;
+        db.Note.create(data)
+            .then(function (dbNote) {
+                db.Article.findOneAndUpdate({
+                    _id: data._headlineId
+                }, {
+                    $push: {
+                        notes: dbNote
+                    }
+                }).then(() => {
+                    res.json("");
+                }).catch(function (err) {
+                    // If an error occurred, send it to the client
+                    res.json(err);
+                });
+            })
+            .catch(function (err) {
+                // If an error occurred, send it to the client
+                res.json(err);
+            });
+    });
+
+    app.delete('/api/notes/:id', (req, res) => {
+        res.setHeader('Content-Type', 'application/json');
+        db.Note.deleteOne({
+                _id: req.params.id
+            })
+            .then(function (dbNote) {
+                // If we were able to successfully find Notes, send them back to the client
+                res.json(dbNote);
+            })
+            .catch(function (err) {
+                // If an error occurred, send it to the client
+                res.json(err);
+            });
     });
 };
 
@@ -56,14 +119,14 @@ module.exports.getClearRoute = (app) => {
         console.log(data);
         res.setHeader('Content-Type', 'application/json');
         db.Article.deleteMany({})
-        .then(function(dbArticle) {
-          // If we were able to successfully find Articles, send them back to the client
-          res.json("Success");
-        })
-        .catch(function(err) {
-          // If an error occurred, send it to the client
-          res.json(err);
-        });
+            .then(function (dbArticle) {
+                // If we were able to successfully find Articles, send them back to the client
+                res.json("Success");
+            })
+            .catch(function (err) {
+                // If an error occurred, send it to the client
+                res.json(err);
+            });
     });
 };
 
@@ -93,7 +156,7 @@ module.exports.getFetchRoute = (app) => {
                         result.saved = false;
 
                         // Create a new Article using the `result` object built from scraping
-                        console.log(`title: ${result.title}, link: ${result.link}`);
+                        // console.log(`title: ${result.title}, link: ${result.link}`);
                         // Create a new Article using the `result` object built from scraping
 
                         for (let article of dbArticle) {
@@ -105,16 +168,22 @@ module.exports.getFetchRoute = (app) => {
                         db.Article.create(result)
                             .then(function (dbArticle) {
                                 // View the added result in the console
-                                console.log(dbArticle);
+                                // console.log(dbArticle);
                             })
                             .catch(function (err) {
                                 // If an error occurred, log it
-                                console.log(err);
+                                // console.log(err);
                             });
                     });
-
+                    db.Article.find({})
+                    .then(function (dbArticle) {
                     // Send a message to the client
-                    res.send("Scrape Complete");
+                        res.json(dbArticle);
+                    })
+                    .catch(function (err) {
+                        // If an error occurred, send it to the client
+                        res.json(err);
+                    });;
                 })
                 .catch(function (err) {
                     // If an error occurred, send it to the client
